@@ -1,27 +1,25 @@
-<idea-plugin version="1">
-  <id>com.humblerookie.buckdimen</id>
-  <name>Bucketed Dimensions</name>
+<idea-plugin version="2">
+  <id>com.hr.dimenify</id>
+  <name>Dimenify</name>
   <version>1.0</version>
-  <vendor email="anvithv4@gmail.com" url="http://www.anvith.in">humblerookie</vendor>
+  <vendor email="anvithv4@gmail.com" url="http://www.anvith.in">Anvith Bhat</vendor>
 
   <description><![CDATA[
-      This plugin generates dimensions for the other bucket values<br>
-      <em>Just point the cursor on the dimension and generate</em>
-      <p>Scaling factors are as follows<br/>
-        <ul>
-          <li>1.0 -> mdpi</li>
-          <li>1.2 -> hdpi</li>
-          <li>1.8 -> xhdpi</li>
-          <li>2.4 -> xxhdpi</li>
-          <li>3.0 -> xxxhdpi</li>
-        </ul>
-      </p>
+  This plugin generates dimensions for the other density bucket values for Android<br/>
+  USAGE<br/>
+    - Just point the cursor on the dimension value in your dimen<br/>
+    - Right click and click on generateand generate<br/>
+    - Click on 'Generate alternate dimens..'<br/>
+    <p>Scaling factors are as follows<br/>
+    <ul> <li>1.0 -> mdpi</li> <li>1.2 -> hdpi</li> <li>1.8 -> xhdpi</li> <li>2.4 -> xxhdpi</li> <li>3.0 -> xxxhdpi</li> </ul> </p>
 
     ]]></description>
 
   <change-notes><![CDATA[
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>
+    First version<br/>
+    TODO
+      - Customizable scale factors
+      - Code cleanup and refactor
     ]]>
   </change-notes>
 
@@ -40,8 +38,8 @@
 
   <actions>
     <!-- Add your actions here -->
-    <action id="generateBucketedDimension" class="com.humblerookie.buckdimen.GenerateAction" text="Alternate dimen values..."
-            description="Generates values for other density buckets for the dimension">
+    <action id="generateDimens" class="com.hr.dimenify.GenerateAction" text="Generate alternate dimens.."
+            description="This generates dimensions for other density buckets">
       <add-to-group group-id="GenerateGroup" anchor="last"/>
     </action>
   </actions>

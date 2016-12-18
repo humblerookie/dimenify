@@ -1,4 +1,4 @@
-package com.humblerookie.buckdimen;
+package com.hr.dimenify;
 
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.command.WriteCommandAction;
