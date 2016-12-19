@@ -1,5 +1,6 @@
 package com.hr.dimenify;
 
+import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.Document;
@@ -15,26 +16,16 @@ import com.intellij.psi.impl.source.xml.XmlDocumentImpl;
 import com.intellij.psi.impl.source.xml.XmlTagImpl;
 import com.intellij.psi.impl.source.xml.XmlTextImpl;
 
+import javax.swing.*;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.hr.dimenify.Constants.*;
 
 
 public class GenerateAction extends AnAction {
-    public static final String RESOURCES_TAG = "resources";
-    public static final String RESOURCES_TEXT = "<resources>\n</resources>";
-    public static final String DIMEN_TAG = "dimen";
-    private static final String NAME_TAG = "name";
-    private static final String PLACEHOLDER_DIMEN = "<dimen name=\"{0}\">{1}{2}</dimen>";
-    private static final float SCALE_FACTORS_DP[] = {1.0f, 1.2f, 1.8f, 2.4f, 3.0f};
-    private static final float SCALE_FACTORS_SP[] = {1.0f, 1.2f, 1.8f, 2.4f, 3.0f};
-    public static final String FILE_NAME = "dimens.xml";
-    public static final String DIRECTORIES[] = {"values", "values-hdpi", "values-xhdpi", "values-xxhdpi", "values-xxxhdpi"};
-    private static final String DP = "dp";
-    private static final String SP = "sp";
-
 
     AtomicInteger fileCreationCount = new AtomicInteger(0);
     int currentBucketIndex;
@@ -55,11 +46,12 @@ public class GenerateAction extends AnAction {
         }
 
         fileCreationCount.set(0);
+
         int offset = editor.getCaretModel().getOffset();
         PsiElement psiElement = psiFile.findElementAt(offset);
         if (psiFile.getFileType() == StdFileTypes.XML) {
             currentBucketIndex = getBucketIndex(psiFile);
-            values = getInsertionValuesElement(currentBucketIndex, psiElement);
+            values = getInsertionValuesElement(psiElement);
             if (values == null) {
                 e.getPresentation().setEnabled(false);
                 return;
@@ -79,8 +71,8 @@ public class GenerateAction extends AnAction {
     private int getBucketIndex(PsiFile psiFile) {
 
         PsiDirectory psiDirectory = psiFile.getParent();
-        for (int i = 0; i < DIRECTORIES.length; i++) {
-            if (psiDirectory.getName().equals(DIRECTORIES[i])) {
+        for (int i = 0; i < Constants.DIRECTORIES.length; i++) {
+            if (psiDirectory.getName().equals(Constants.DIRECTORIES[i])) {
                 return i;
             }
         }
@@ -90,7 +82,7 @@ public class GenerateAction extends AnAction {
     private void writeScaledValuesToFiles(PsiDirectory directory, int currentBucketIndex, String[] values) {
         for (int i = 0; i < values.length; i++) {
             if (i != currentBucketIndex) {
-                PsiFile file = directory.findSubdirectory(DIRECTORIES[i]).findFile(FILE_NAME);
+                PsiFile file = directory.findSubdirectory(Constants.DIRECTORIES[i]).findFile(Constants.FILE_NAME);
 
 
                 final int x = i;
@@ -113,20 +105,20 @@ public class GenerateAction extends AnAction {
 
     private void createDirectoriesAndFilesIfNeeded(PsiDirectory psiParent) {
         for (String directory :
-                DIRECTORIES) {
+                Constants.DIRECTORIES) {
 
             WriteCommandAction.runWriteCommandAction(project, () -> {
                 PsiDirectory subDirectory = psiParent.findSubdirectory(directory);
                 if (subDirectory == null) {
                     subDirectory = psiParent.createSubdirectory(directory);
                 }
-                PsiFile file = subDirectory.findFile(FILE_NAME);
+                PsiFile file = subDirectory.findFile(Constants.FILE_NAME);
                 if (file == null) {
-                    PsiFile psiFile = subDirectory.createFile(FILE_NAME);
+                    PsiFile psiFile = subDirectory.createFile(Constants.FILE_NAME);
 
 
                     Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
-                    document.setText(RESOURCES_TEXT);
+                    document.setText(Constants.RESOURCES_TEXT);
                     fileCreationCompleteAndCheck(psiParent);
 
 
@@ -139,12 +131,12 @@ public class GenerateAction extends AnAction {
 
     private void fileCreationCompleteAndCheck(PsiDirectory psiDirectory) {
         int value = fileCreationCount.incrementAndGet();
-        if (value == DIRECTORIES.length) {
+        if (value == Constants.DIRECTORIES.length) {
             writeScaledValuesToFiles(psiDirectory, currentBucketIndex, values);
         }
     }
 
-    private String[] getInsertionValuesElement(int currentBucketIndex, PsiElement psiElement) {
+    private String[] getInsertionValuesElement( PsiElement psiElement) {
         PsiElement selectedNode = psiElement;
         PsiElement rootParent;
         PsiElement subNode;
@@ -160,35 +152,24 @@ public class GenerateAction extends AnAction {
 
             if (subNode instanceof XmlTagImpl && selectedNode instanceof XmlTagImpl) {
                 XmlTagImpl currentNode = (XmlTagImpl) selectedNode;
-                if (((XmlTagImpl) subNode).getName().equals(RESOURCES_TAG) && currentNode.getName().equals(DIMEN_TAG)) {
+                if (((XmlTagImpl) subNode).getName().equals(Constants.RESOURCES_TAG) && currentNode.getName().equals(Constants.DIMEN_TAG)) {
                     XmlAttributeImpl attribute = null;
                     XmlTextImpl value = null;
                     for (PsiElement element : currentNode.getChildren()) {
-                        if (element instanceof XmlAttributeImpl && ((XmlAttributeImpl) element).getLocalName().equals(NAME_TAG)) {
+                        if (element instanceof XmlAttributeImpl && ((XmlAttributeImpl) element).getLocalName().equals(Constants.NAME_TAG)) {
                             attribute = (XmlAttributeImpl) element;
                         } else if (element instanceof XmlTextImpl) {
                             value = (XmlTextImpl) element;
                         }
                     }
 
-                    if (attribute != null ) {
+                    if (attribute != null) {
                         String attributeName = attribute.getValue();
                         String val = value.getValue().toLowerCase().trim();
 
-                        if(val.endsWith(DP) || val.endsWith(SP)) {
+                        if (val.endsWith(Constants.DP) || val.endsWith(Constants.SP)) {
 
-                            float scaleFactor[] = val.endsWith(DP) ? SCALE_FACTORS_DP : SCALE_FACTORS_SP;
-                            float mdpiValue = Float.parseFloat(val.substring(0, val.length() - 2)) / scaleFactor[currentBucketIndex];
-                            float scaledValues[] = new float[scaleFactor.length];
-                            String elementsScaled[] = new String[scaleFactor.length];
-                            NumberFormat formatter = new DecimalFormat("#0.0");
-                            for (int i = 0; i < scaledValues.length; i++) {
-                                scaledValues[i] = mdpiValue * scaleFactor[i];
-                                elementsScaled[i] = MessageFormat.format(PLACEHOLDER_DIMEN, attributeName
-                                        , formatter.format(scaledValues[i])
-                                        , val.endsWith(DP) ? DP : SP);
-                            }
-                            return elementsScaled;
+                            return showScaleDialog(attributeName,val,val.endsWith(Constants.DP));
                         }
 
                     }
@@ -200,5 +181,48 @@ public class GenerateAction extends AnAction {
             return null;
         }
     }
+
+    private String[] showScaleDialog(String attributeName, String val, boolean isDp) {
+        GenerateDialog generateDialog = new GenerateDialog(project,isDp);
+        generateDialog.show();
+        if(generateDialog.isOK()) {
+           saveValues(generateDialog,isDp);
+
+            float scaleFactor[] = new float[BUCKETS.length];
+            for (int i = 0; i < BUCKETS.length; i++) {
+                scaleFactor[i]=PropertiesComponent.getInstance().getFloat(SAVE_PREFIX+(isDp? DP:SP)+BUCKETS[i], 0);
+            }
+            float mdpiValue = Float.parseFloat(val.substring(0, val.length() - 2)) / scaleFactor[currentBucketIndex];
+            float scaledValues[] = new float[scaleFactor.length];
+            String elementsScaled[] = new String[scaleFactor.length];
+            NumberFormat formatter = new DecimalFormat("#0.0");
+            for (int i = 0; i < scaledValues.length; i++) {
+                scaledValues[i] = mdpiValue * scaleFactor[i];
+                elementsScaled[i] = MessageFormat.format(Constants.PLACEHOLDER_DIMEN, attributeName
+                        , formatter.format(scaledValues[i])
+                        , val.endsWith(Constants.DP) ? Constants.DP : Constants.SP);
+            }
+            return  elementsScaled;
+        }
+        return  null;
+    }
+
+    private void saveValues(GenerateDialog generateDialog, boolean isDp) {
+        for (int i = 0; i < generateDialog.getTextFields().length; i++) {
+            JTextField textField = generateDialog.getTextFields()[i];
+            float factor=isDp? SCALE_FACTORS_DP[i]: SCALE_FACTORS_SP[i];
+            if(textField.getText().trim().length() !=0) {
+                try {
+                    float f= Float.parseFloat(textField.getText().trim());
+                    if(f >0) {
+                        factor = f;
+                    }
+                }catch (NumberFormatException ex) {
+                }
+            }
+            PropertiesComponent.getInstance().setValue(SAVE_PREFIX+(isDp? DP:SP)+BUCKETS[i], factor,-1);
+        }
+    }
+
 
 }

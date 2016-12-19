@@ -1,7 +1,7 @@
 <idea-plugin version="2">
   <id>com.hr.dimenify</id>
   <name>Dimenify</name>
-  <version>1.0</version>
+  <version>2.0</version>
   <vendor email="anvithv4@gmail.com" url="http://www.anvith.in">Anvith Bhat</vendor>
 
   <description><![CDATA[
@@ -16,10 +16,14 @@
     ]]></description>
 
   <change-notes><![CDATA[
-    First version<br/>
+    <b>v2.0</b><br/>
+     - Added custom scaling factors for sp and dp
+    <pre>
     TODO
-      - Customizable scale factors
-      - Code cleanup and refactor
+      - Parse elements as psi elements and update file accordingly.
+      - Auto Detect Other dimension files </pre><br/>
+    <b>v1.0</b><br/>
+    Contains hard bound scaling factors.
     ]]>
   </change-notes>
 
