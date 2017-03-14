@@ -18,8 +18,10 @@ import com.intellij.psi.impl.source.xml.XmlTextImpl;
 
 import javax.swing.*;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.hr.dimenify.Constants.*;
@@ -34,7 +36,7 @@ public class GenerateAction extends AnAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
-
+        Locale.setDefault(new Locale("pt","BR"));
         PsiFile psiFile = e.getData(LangDataKeys.PSI_FILE);
 
         project = e.getRequiredData(CommonDataKeys.PROJECT);
@@ -186,6 +188,10 @@ public class GenerateAction extends AnAction {
         GenerateDialog generateDialog = new GenerateDialog(project,isDp);
         generateDialog.show();
         if(generateDialog.isOK()) {
+            DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.getDefault());
+            otherSymbols.setDecimalSeparator('.');
+            otherSymbols.setGroupingSeparator(',');
+            DecimalFormat formatter = new DecimalFormat("#0.0",otherSymbols);
            saveValues(generateDialog,isDp);
 
             float scaleFactor[] = new float[BUCKETS.length];
@@ -195,7 +201,7 @@ public class GenerateAction extends AnAction {
             float mdpiValue = Float.parseFloat(val.substring(0, val.length() - 2)) / scaleFactor[currentBucketIndex];
             float scaledValues[] = new float[scaleFactor.length];
             String elementsScaled[] = new String[scaleFactor.length];
-            NumberFormat formatter = new DecimalFormat("#0.0");
+
             for (int i = 0; i < scaledValues.length; i++) {
                 scaledValues[i] = mdpiValue * scaleFactor[i];
                 elementsScaled[i] = MessageFormat.format(Constants.PLACEHOLDER_DIMEN, attributeName
