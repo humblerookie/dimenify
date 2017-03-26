@@ -1,10 +1,10 @@
 <idea-plugin version="2">
-  <id>com.hr.dimenify</id>
-  <name>Dimenify</name>
-  <version>2.1</version>
-  <vendor email="anvithv4@gmail.com" url="http://www.anvith.in">Anvith Bhat</vendor>
+    <id>com.hr.dimenify</id>
+    <name>Dimenify</name>
+    <version>3.0</version>
+    <vendor email="anvithv4@gmail.com" url="http://www.anvith.in">Anvith Bhat</vendor>
 
-  <description><![CDATA[
+    <description><![CDATA[
   This plugin generates dimensions for the other density bucket values for Android<br/>
   USAGE<br/>
     - Just point the cursor on the dimension value in your dimen<br/>
@@ -15,7 +15,12 @@
 
     ]]></description>
 
-  <change-notes><![CDATA[
+    <change-notes><![CDATA[
+    <b>v2.2</b><br/>
+    - Added ability to provide custom buckets upto a max of 5.
+    - User can now choose to exclude any buckets from current dimension generation.
+    - Auto detect new buckets and prompt user for scale value.
+
     <b>v2.1</b><br/>
      - Bugfix for some locales where comma is used as decimal separator.
     <b>v2.0</b><br/>
@@ -27,27 +32,27 @@
     <b>v1.0</b><br/>
     Contains hard bound scaling factors.
     ]]>
-  </change-notes>
+    </change-notes>
 
-  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-  <idea-version since-build="145.0"/>
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="145.0"/>
 
-  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
-       on how to target different products -->
-  <!-- uncomment to enable plugin in all products
-  <depends>com.intellij.modules.lang</depends>
-  -->
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
 
-  <extensions defaultExtensionNs="com.intellij">
-    <!-- Add your extensions here -->
-  </extensions>
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+    </extensions>
 
-  <actions>
-    <!-- Add your actions here -->
-    <action id="generateDimens" class="com.hr.dimenify.GenerateAction" text="Generate alternate dimens.."
-            description="This generates dimensions for other density buckets">
-      <add-to-group group-id="GenerateGroup" anchor="last"/>
-    </action>
-  </actions>
+    <actions>
+        <!-- Add your actions here -->
+        <action id="generateDimens" class="com.hr.dimenify.action.GenerateAction" text="Generate alternate dimens.."
+                description="This generates dimensions for other density buckets">
+            <add-to-group group-id="GenerateGroup" anchor="last"/>
+        </action>
+    </actions>
 
 </idea-plugin>
