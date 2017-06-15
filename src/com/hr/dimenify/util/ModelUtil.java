@@ -14,11 +14,13 @@ public class ModelUtil {
 
     static Gson gson = new Gson();
 
-    public static  String toJson(List<Dimen> dimenList) {
-        return  gson.toJson(dimenList);
+    public static String toJson(List<Dimen> dimenList) {
+        return gson.toJson(dimenList);
     }
-    public static  ArrayList<Dimen>  fromJson(String data) {
-        ArrayList<Dimen> dimenList = gson.fromJson(data, new TypeToken<ArrayList<Dimen>>(){}.getType());
-        return  dimenList;
+
+    public static ArrayList<Dimen> fromJson(String data) {
+        ArrayList<Dimen> dimenList = gson.fromJson(data, new TypeToken<ArrayList<Dimen>>() {
+        }.getType());
+        return dimenList;
     }
 }
