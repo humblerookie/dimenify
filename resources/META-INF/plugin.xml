@@ -19,9 +19,6 @@
         - Patched a few bugs.
 
     <b>v3.0</b><br/>
-        - Bug fix.
-
-    <b>v2.2</b><br/>
         - Added ability to provide custom buckets upto a max of 5.
         - User can now choose to exclude any buckets from current dimension generation.
         - Auto detect new buckets and prompt user for scale value.
