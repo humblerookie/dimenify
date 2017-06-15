@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_dimenify" default="compile.module.dimenify">
+  <dirname property="module.dimenify.basedir" file="${ant.file.module_dimenify}"/>
+  
+  <property name="module.jdk.home.dimenify" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.dimenify" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.dimenify" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.dimenify" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="dimenify.output.dir" value="${module.dimenify.basedir}/out/production/dimenify"/>
+  <property name="dimenify.testoutput.dir" value="${module.dimenify.basedir}/out/test/dimenify"/>
+  
+  <path id="dimenify.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="dimenify.module.production.classpath">
+    <path refid="${module.jdk.classpath.dimenify}"/>
+  </path>
+  
+  <path id="dimenify.runtime.production.module.classpath">
+    <pathelement location="${dimenify.output.dir}"/>
+  </path>
+  
+  <path id="dimenify.module.classpath">
+    <path refid="${module.jdk.classpath.dimenify}"/>
+    <pathelement location="${dimenify.output.dir}"/>
+  </path>
+  
+  <path id="dimenify.runtime.module.classpath">
+    <pathelement location="${dimenify.testoutput.dir}"/>
+    <pathelement location="${dimenify.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.dimenify">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.dimenify">
+    <patternset refid="excluded.from.module.dimenify"/>
+  </patternset>
+  
+  <path id="dimenify.module.sourcepath">
+    <dirset dir="${module.dimenify.basedir}">
+      <include name="src"/>
+      <include name="resources"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.dimenify" depends="compile.module.dimenify.production,compile.module.dimenify.tests" description="Compile module dimenify"/>
+  
+  <target name="compile.module.dimenify.production" depends="register.custom.compilers" description="Compile module dimenify; production classes">
+    <mkdir dir="${dimenify.output.dir}"/>
+    <javac2 destdir="${dimenify.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.dimenify}/javac">
+      <compilerarg line="${compiler.args.dimenify}"/>
+      <bootclasspath refid="dimenify.module.bootclasspath"/>
+      <classpath refid="dimenify.module.production.classpath"/>
+      <src refid="dimenify.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.dimenify"/>
+    </javac2>
+    
+    <copy todir="${dimenify.output.dir}">
+      <fileset dir="${module.dimenify.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+      <fileset dir="${module.dimenify.basedir}/resources">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.dimenify.tests" depends="register.custom.compilers,compile.module.dimenify.production" description="compile module dimenify; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.dimenify" description="cleanup module">
+    <delete dir="${dimenify.output.dir}"/>
+    <delete dir="${dimenify.testoutput.dir}"/>
+  </target>
+  
+  <property name="dimenify.plugin.path.jar" value="${module.dimenify.basedir}/dimenify.jar"/>
+  
+  <!-- Build archive for plugin 'dimenify' -->
+  <target name="plugin.build.jar.dimenify" depends="compile.module.dimenify" description="Build plugin archive for module &#39;dimenify&#39;">
+    <jar destfile="${dimenify.plugin.path.jar}" duplicate="preserve">
+      <zipfileset dir="${module.dimenify.basedir}/out/production/dimenify"/>
+      <zipfileset file="${module.dimenify.basedir}/resources/META-INF/plugin.xml" prefix="META-INF"/>
+      <manifest>
+        <attribute name="Created-By" value="IntelliJ IDEA"/>
+        <attribute name="Manifest-Version" value="1.0"/>
+      </manifest>
+    </jar>
+  </target>
+</project>

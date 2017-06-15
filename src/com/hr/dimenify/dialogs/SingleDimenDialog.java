@@ -20,9 +20,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import static com.hr.dimenify.util.Constants.ERROR_CODE;
-import static com.hr.dimenify.util.Constants.ERROR_MESSAGES;
+import static com.hr.dimenify.util.Constants.MESSAGES;
 
-public class GenerateDialog extends DialogWrapper {
+public class SingleDimenDialog extends DialogWrapper {
     private JPanel controlPanel;
     private List<Component> bucketLabels = new ArrayList<>();
     private List<JCheckBox> selectionValues = new ArrayList<>();
@@ -36,7 +36,7 @@ public class GenerateDialog extends DialogWrapper {
 
     boolean isDp;
 
-    public GenerateDialog(@Nullable Project project, boolean isDp, ArrayList<Dimen> data) {
+    public SingleDimenDialog(@Nullable Project project, boolean isDp, ArrayList<Dimen> data) {
         super(project);
         this.isDp = isDp;
         this.data = data;
@@ -176,7 +176,7 @@ public class GenerateDialog extends DialogWrapper {
             protected void doAction(ActionEvent actionEvent) {
 
                 int invalidIndex = invalidBucketIndex();
-                if (invalidIndex == 0) {
+                if (invalidIndex == -1) {
                     JTextField bucketValue = new JTextField();
                     bucketValue.setColumns(15);
                     bucketValue.setText(Constants.DEFAULT_BUCKET);
@@ -223,6 +223,12 @@ public class GenerateDialog extends DialogWrapper {
                             } catch (NullPointerException | NumberFormatException ex) {
 
                             }
+                            if (val <= 0) {
+                                val = 1;
+                                scaleFactor.setText(val + "");
+                            }
+
+                            dimen.setFactorDp(val);
                             if (isDp) {
                                 dimen.setFactorDp(val);
 
@@ -283,7 +289,7 @@ public class GenerateDialog extends DialogWrapper {
 
     public int invalidBucketIndex() {
         HashMap<String, Boolean> containedBuckets = new HashMap<>();
-        if (data.size() > 9) {
+        if (data.size() >= Constants.MAX_DIMENS) {
             return ERROR_CODE[1];
         }
         for (Dimen dimen : data) {
@@ -293,12 +299,12 @@ public class GenerateDialog extends DialogWrapper {
             containedBuckets.put(dimen.getBucket(), true);
         }
 
-        return 0;
+        return -1;
     }
 
 
     public void showAlert(int option) {
-        JOptionPane optionPane = new JOptionPane(ERROR_MESSAGES[option - 1], JOptionPane.WARNING_MESSAGE);
+        JOptionPane optionPane = new JOptionPane(MESSAGES[option - 1], JOptionPane.WARNING_MESSAGE);
         JDialog dialog = optionPane.createDialog(Constants.ERROR_TITLE);
         dialog.setAlwaysOnTop(true);
         dialog.setVisible(true);

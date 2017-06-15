@@ -1,6 +1,6 @@
 package com.hr.dimenify.action;
 
-import com.hr.dimenify.dialogs.GenerateDialog;
+import com.hr.dimenify.dialogs.SingleDimenDialog;
 import com.hr.dimenify.model.Dimen;
 import com.hr.dimenify.util.Constants;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -23,14 +23,15 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import static com.hr.dimenify.util.Constants.ERROR_CODE;
 
-public class GenerateAction extends AbstractDimenAction {
+
+public class GenerateSingleDimenAction extends AbstractDimenAction {
 
     @Override
     public void actionPerformed(AnActionEvent e) {
         super.actionPerformed(e);
         PsiFile psiFile = e.getData(LangDataKeys.PSI_FILE);
-        migrateData();
         Editor editor = PlatformDataKeys.EDITOR.getData(e.getDataContext());
 
         if (psiFile == null || editor == null) {
@@ -76,7 +77,7 @@ public class GenerateAction extends AbstractDimenAction {
             } else {
                 if (psiFile.getParent().getParent() != null) {
                     PsiDirectory psiDirectory = psiFile.getParent().getParent();
-                    createDirectoriesAndFilesIfNeeded(psiDirectory);
+                    createDirectoriesAndFilesIfNeeded(psiDirectory, Constants.Mode.SINGLE);
 
                 }
             }
@@ -84,6 +85,11 @@ public class GenerateAction extends AbstractDimenAction {
             e.getPresentation().setEnabled(false);
             return;
         }
+    }
+
+    @Override
+    protected void writeBulkValuesToFiles() {
+
     }
 
 
@@ -94,8 +100,9 @@ public class GenerateAction extends AbstractDimenAction {
         if (psiElement != null && psiElement.getParent() != null && psiElement.getParent().getParent() != null) {
             subNode = psiElement.getParent();
             rootParent = subNode.getParent();
+            ArrayList<PsiElement> elementHierachy = new ArrayList<>();
 
-            while (!(rootParent instanceof XmlDocumentImpl)) {
+            while (!(rootParent instanceof XmlDocumentImpl) && (!(selectedNode instanceof XmlTagImpl) || !((XmlTagImpl) selectedNode).getName().equals(Constants.DIMEN_TAG))) {
                 rootParent = rootParent.getParent();
                 subNode = subNode.getParent();
                 selectedNode = selectedNode.getParent();
@@ -134,15 +141,15 @@ public class GenerateAction extends AbstractDimenAction {
     }
 
     private String[] showScaleDialog(String attributeName, String val, boolean isDp) {
-        GenerateDialog generateDialog = new GenerateDialog(project, isDp, data);
-        generateDialog.show();
-        int invalidIndex = generateDialog.invalidBucketIndex();
-        if (generateDialog.isOK() && invalidIndex == 0) {
+        SingleDimenDialog singleDimenDialog = new SingleDimenDialog(project, isDp, data);
+        singleDimenDialog.show();
+        int invalidIndex = singleDimenDialog.invalidBucketIndex();
+        if (singleDimenDialog.isOK() && (invalidIndex == -1 || (invalidIndex == ERROR_CODE[1] && data.size() == Constants.MAX_DIMENS))) {
             DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.getDefault());
             otherSymbols.setDecimalSeparator('.');
             otherSymbols.setGroupingSeparator(',');
             DecimalFormat formatter = new DecimalFormat("#0.0", otherSymbols);
-            ArrayList<Dimen> data = generateDialog.getConversionValues();
+            ArrayList<Dimen> data = singleDimenDialog.getConversionValues();
             saveValues(data);
 
 
@@ -166,8 +173,8 @@ public class GenerateAction extends AbstractDimenAction {
                         , val.endsWith(Constants.DP) ? Constants.DP : Constants.SP);
             }
             return elementsScaled;
-        } else if (invalidIndex != 0) {
-            generateDialog.showAlert(invalidIndex);
+        } else if (singleDimenDialog.isOK()) {
+            singleDimenDialog.showAlert(invalidIndex);
         }
         return null;
     }

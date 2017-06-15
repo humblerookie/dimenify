@@ -9,18 +9,22 @@ public interface Constants {
     String RESOURCES_TEXT = "<resources>\n</resources>";
     String RESOURCES_TAG = "resources";
     String DIMEN_TAG = "dimen";
+    String MDPI = "mdpi";
+    float TITLE_SIZE = 16.0f;
     String NAME_TAG = "name";
-    String PLACEHOLDER_DIMEN = "<dimen name=\"{0}\">{1}{2}</dimen>";
+    String PLACEHOLDER_DIMEN = "<dimen name=\"{0}\">{1}{2}</dimen>\n";
     String FILE_NAME = "dimens.xml";
     String VALUES_PREFIX = "values-";
     String DP = "dp";
     String SP = "sp";
     String TITLE = "Set scale factors for ";
-    String ERROR_MESSAGES[] = {
+    String BULK_TITLE = "Your scaling factors are";
+    String MESSAGES[] = {
             "There are duplicate buckets please fix before adding more."
             , "Custom buckets are restricted to 5"
             , "Could not map the resource folder to a density value"
             , "Could not convert the value into a number"
+            , "Could not map xml the file to a density bucket.\n Please check if the source density bucket was added"
     };
     int ERROR_CODE[] = {1, 2};
     String ERROR_TITLE = "Error";
@@ -29,4 +33,11 @@ public interface Constants {
     String METRIC = " metric";
     String DEFAULT_BUCKET = "sw600dp-land";
     float DEFAULT_SCALE_FACTOR = 1.2f;
+    int MAX_DIMENS = 10;
+
+    enum Mode {
+        SINGLE,
+        BULK;
+    }
+
 }

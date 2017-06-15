@@ -1,36 +1,47 @@
 <idea-plugin version="2">
     <id>com.hr.dimenify</id>
     <name>Dimenify</name>
-    <version>3.0</version>
-    <vendor email="anvithv4@gmail.com" url="http://www.anvith.in">Anvith Bhat</vendor>
+    <version>3.1</version>
+    <vendor email="anvithv4@gmail.com" url="https://www.anvith.in">Anvith Bhat</vendor>
 
     <description><![CDATA[
   This plugin generates dimensions for the other density bucket values for Android<br/>
   USAGE<br/>
     - Just point the cursor on the dimension value in your dimen<br/>
-    - Right click and click on generateand generate<br/>
-    - Click on 'Generate alternate dimens..'<br/>
-    <p>Scaling factors are as follows<br/>
-    <ul> <li>1.0 -> mdpi</li> <li>1.2 -> hdpi</li> <li>1.8 -> xhdpi</li> <li>2.4 -> xxhdpi</li> <li>3.0 -> xxxhdpi</li> </ul> </p>
-
+    - Right click and click on Generate -> 'Generate alternate dimens..'<br/>
+    - Alternately you can convert entire xml file in one bucket to others using right click on file-> Generate alternate dimens from file.<br/>
     ]]></description>
 
     <change-notes><![CDATA[
+    <b>v3.1</b><br/>
+        - Added bulk file conversion support. Now one can right click on a dimen file
+          and generate transformed dimensions for all values in the file.
+        - Patched a few bugs.
+
+    <b>v3.0</b><br/>
+        - Bug fix.
+
     <b>v2.2</b><br/>
-    - Added ability to provide custom buckets upto a max of 5.
-    - User can now choose to exclude any buckets from current dimension generation.
-    - Auto detect new buckets and prompt user for scale value.
+        - Added ability to provide custom buckets upto a max of 5.
+        - User can now choose to exclude any buckets from current dimension generation.
+        - Auto detect new buckets and prompt user for scale value.
+
+    <b>v2.2</b><br/>
+        - Added ability to provide custom buckets upto a max of 5.
+        - User can now choose to exclude any buckets from current dimension generation.
+        - Auto detect new buckets and prompt user for scale value.
 
     <b>v2.1</b><br/>
-     - Bugfix for some locales where comma is used as decimal separator.
+        - Bugfix for some locales where comma is used as decimal separator.
+
     <b>v2.0</b><br/>
-     - Added custom scaling factors for sp and dp
+        - Added custom scaling factors for sp and dp
     <pre>
-    TODO
+       TODO
       - Parse elements as psi elements and update file accordingly.
-      - Auto Detect Other dimension files </pre><br/>
+     </pre><br/>
     <b>v1.0</b><br/>
-    Contains hard bound scaling factors.
+       Contains hard bound scaling factors.
     ]]>
     </change-notes>
 
@@ -49,9 +60,19 @@
 
     <actions>
         <!-- Add your actions here -->
-        <action id="generateDimens" class="com.hr.dimenify.action.GenerateAction" text="Generate alternate dimens.."
+        <action id="generateDimens" class="com.hr.dimenify.action.GenerateSingleDimenAction"
+                text="Generate alternate dimens.."
+                icon="/icons/dimenify.png"
                 description="This generates dimensions for other density buckets">
             <add-to-group group-id="GenerateGroup" anchor="last"/>
+        </action>
+
+        <action id="rightClickDimenFile" class="com.hr.dimenify.action.BulkGenerateAction"
+                text="Generate alternate dimens from file"
+                icon="/icons/dimenify.png"
+                description="This generates dimensions for other density buckets">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="before"
+                          relative-to-action="ProjectViewPopupMenuRefactoringGroup"/>
         </action>
     </actions>
 
