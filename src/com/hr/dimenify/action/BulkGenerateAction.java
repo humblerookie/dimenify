@@ -166,13 +166,13 @@ public class BulkGenerateAction extends AbstractDimenAction {
                                     String name = tag.getAttribute("name").getValue();
                                     if (floatDimen[0].containsKey(name)) {
                                         String dimenFormattedString = MessageFormat.format(Constants.PLACEHOLDER_DIMEN, name
-                                                , (floatDimen[0].get(name) * data.get(bucketIndex).getFactorDp())
+                                                , String.valueOf(floatDimen[0].get(name) * data.get(bucketIndex).getFactorDp())
                                                 , Constants.DP);
                                         stringBuilder.append(dimenFormattedString);
                                         setDp.remove(name);
                                     } else if (floatDimen[1].containsKey(name)) {
                                         String dimenFormattedString = MessageFormat.format(Constants.PLACEHOLDER_DIMEN, name
-                                                , (floatDimen[1].get(name) * data.get(bucketIndex).getFactorSp())
+                                                , String.valueOf(floatDimen[1].get(name) * data.get(bucketIndex).getFactorSp())
                                                 , Constants.SP);
                                         stringBuilder.append(dimenFormattedString);
                                         setSp.remove(name);
@@ -186,13 +186,13 @@ public class BulkGenerateAction extends AbstractDimenAction {
 
                                 for (String name : setDp) {
                                     String dimenFormattedString = MessageFormat.format(Constants.PLACEHOLDER_DIMEN, name
-                                            , (floatDimen[0].get(name) * data.get(bucketIndex).getFactorDp())
+                                            , String.valueOf(floatDimen[0].get(name) * data.get(bucketIndex).getFactorDp())
                                             , Constants.DP);
                                     stringBuilder.append(dimenFormattedString);
                                 }
                                 for (String name : setSp) {
                                     String dimenFormattedString = MessageFormat.format(Constants.PLACEHOLDER_DIMEN, name
-                                            , (floatDimen[1].get(name) * data.get(bucketIndex).getFactorSp())
+                                            , String.valueOf(floatDimen[1].get(name) * data.get(bucketIndex).getFactorSp())
                                             , Constants.SP);
                                     stringBuilder.append(dimenFormattedString);
                                 }

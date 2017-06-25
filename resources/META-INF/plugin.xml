@@ -1,7 +1,7 @@
 <idea-plugin version="2">
     <id>com.hr.dimenify</id>
     <name>Dimenify</name>
-    <version>3.1</version>
+    <version>3.2</version>
     <vendor email="anvithv4@gmail.com" url="https://www.anvith.in">Anvith Bhat</vendor>
 
     <description><![CDATA[
@@ -13,6 +13,9 @@
     ]]></description>
 
     <change-notes><![CDATA[
+     <b>v3.2</b><br/>
+        - Fixed a message formatter bug causing floated strings to be prettified with comma.
+
     <b>v3.1</b><br/>
         - Added bulk file conversion support. Now one can right click on a dimen file
           and generate transformed dimensions for all values in the file.
