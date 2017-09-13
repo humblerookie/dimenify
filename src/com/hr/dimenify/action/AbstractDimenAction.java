@@ -14,10 +14,14 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
+import com.intellij.psi.xml.XmlFile;
+import com.intellij.psi.xml.XmlTag;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.Locale;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.MessageFormat;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.hr.dimenify.util.Constants.*;
@@ -26,9 +30,10 @@ public abstract class AbstractDimenAction extends AnAction {
 
     protected ArrayList<Dimen> data;
     protected Project project;
-    protected String values[];
     protected AtomicInteger fileCreationCount = new AtomicInteger(0);
     protected int currentBucketIndex;
+    protected PsiFile psiFile;
+    protected XmlFile xmlFile;
 
     @Override
     public void actionPerformed(AnActionEvent e) {
@@ -93,7 +98,7 @@ public abstract class AbstractDimenAction extends AnAction {
         dialog.setVisible(true);
     }
 
-    protected void createDirectoriesAndFilesIfNeeded(PsiDirectory psiParent, Mode mode) {
+    protected void createDirectoriesAndFilesIfNeeded(PsiDirectory psiParent) {
         for (Dimen datum : data) {
             WriteCommandAction.runWriteCommandAction(project, () -> {
                 PsiDirectory subDirectory = psiParent.findSubdirectory(datum.getDirectory());
@@ -103,27 +108,21 @@ public abstract class AbstractDimenAction extends AnAction {
                 PsiFile file = subDirectory.findFile(Constants.FILE_NAME);
                 if (file == null) {
                     PsiFile psiFile = subDirectory.createFile(Constants.FILE_NAME);
-
-
                     Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
                     document.setText(Constants.RESOURCES_TEXT);
-                    fileCreationCompleteAndCheck(psiParent, mode);
+                    fileCreationCompleteAndCheck();
 
                 } else {
-                    fileCreationCompleteAndCheck(psiParent, mode);
+                    fileCreationCompleteAndCheck();
                 }
             });
         }
     }
 
-    protected void fileCreationCompleteAndCheck(PsiDirectory psiDirectory, Mode mode) {
+    protected void fileCreationCompleteAndCheck() {
         int value = fileCreationCount.incrementAndGet();
         if (value == data.size()) {
-            if (mode == Mode.SINGLE) {
-                writeScaledValuesToFiles(psiDirectory, currentBucketIndex, values);
-            } else if (mode == Mode.BULK) {
-                writeBulkValuesToFiles();
-            }
+            calculateAndWriteScaledValueToFiles();
         }
     }
 
@@ -139,32 +138,135 @@ public abstract class AbstractDimenAction extends AnAction {
         return file != null && file.getName().endsWith(".xml") && file.getParent().getName().startsWith("values");
     }
 
-    protected abstract void writeBulkValuesToFiles();
+    protected abstract void calculateAndWriteScaledValueToFiles();
 
-    protected void writeScaledValuesToFiles(PsiDirectory directory, int currentBucketIndex, String[] values) {
-        for (int i = 0; i < values.length; i++) {
-            if (i != currentBucketIndex && data.get(i).isSelected()) {
-                PsiFile file = directory.findSubdirectory(data.get(i).getDirectory()).findFile(Constants.FILE_NAME);
+    protected XmlTag[] getDimenValuesInFile(XmlFile xmlFile) {
+        XmlTag[] dimens = null;
+        if (xmlFile.getDocument() != null && xmlFile.getDocument().getRootTag() != null) {
+            String name = xmlFile.getDocument().getRootTag().getName();
 
-
-                final int x = i;
-                WriteCommandAction.runWriteCommandAction(project, new Runnable() {
-                    @Override
-                    public void run() {
-                        Document document = PsiDocumentManager.getInstance(project).getDocument(file);
-                        document.setReadOnly(false);
-                        String text = document.getText();
-                        int indexStart = text.indexOf("<resources");
-                        if (indexStart != -1) {
-                            int index = text.indexOf(">", indexStart) + 1;
-                            StringBuilder stringBuilder = new StringBuilder(text);
-                            document.setText(stringBuilder.insert(index, "\n" + values[x]).toString());
-                        }
+            switch (name) {
+                case "xml":
+                    XmlTag resourcesTag = xmlFile.getDocument().getRootTag().findFirstSubTag("resources");
+                    if (resourcesTag != null) {
+                        dimens = resourcesTag.findSubTags("dimen");
                     }
-                });
-
+                    break;
+                case "resources":
+                    dimens = xmlFile.getDocument().getRootTag().findSubTags("dimen");
+                    break;
 
             }
         }
+        return dimens;
+    }
+
+    protected HashMap<String, Float>[] normalizeToHashMap(XmlTag[] dimens, int bucketIndex) {
+        HashMap<String, Float> dpHashMap = new HashMap<>();
+        HashMap<String, Float> spHashMap = new HashMap<>();
+        for (XmlTag tag : dimens) {
+            String val = tag.getValue().getText().toString().toLowerCase();
+            try {
+                if (val.endsWith(Constants.DP)) {
+                    dpHashMap.put(tag.getAttribute("name").getValue(),
+                            Float.parseFloat(val.substring(0, val.length() - 2)) / data.get(bucketIndex).getFactorDp());
+                } else if (val.endsWith(Constants.SP)) {
+                    spHashMap.put(tag.getAttribute("name").getValue(),
+                            Float.parseFloat(val.substring(0, val.length() - 2)) / data.get(bucketIndex).getFactorSp());
+                }
+            } catch (NumberFormatException | ArithmeticException e) {
+                e.printStackTrace();
+            }
+
+        }
+        return new HashMap[]{dpHashMap, spHashMap};
+    }
+
+    protected void writeScaledValuesToFiles(PsiDirectory directory, HashMap<String, Float>[] floatDimen) {
+
+        for (int i = 0; i < data.size(); i++) {
+            if (i != currentBucketIndex && data.get(i).isSelected()) {
+                PsiFile file = directory.findSubdirectory(data.get(i).getDirectory()).findFile(Constants.FILE_NAME);
+                if (file instanceof XmlFile) {
+                    XmlFile xmlFile = (XmlFile) file;
+                    XmlTag[] tags = getDimenValuesInFile(xmlFile);
+                    final int bucketIndex = i;
+                    WriteCommandAction.runWriteCommandAction(project, new Runnable() {
+                        @Override
+                        public void run() {
+                            StringBuilder stringBuilder = new StringBuilder();
+                            Document document = PsiDocumentManager.getInstance(project).getDocument(file);
+                            document.setReadOnly(false);
+                            String text = document.getText();
+                            int indexStart = text.indexOf("<resources");
+                            if (indexStart != -1) {
+                                int index = text.indexOf(">", indexStart) + 1;
+                                stringBuilder.append(text.substring(0, index));
+                                stringBuilder.append("\n");
+                                Set<String> setDp = new HashSet<String>(floatDimen[0].keySet());
+                                Set<String> setSp = new HashSet<String>(floatDimen[1].keySet());
+                                for (int j = 0; tags != null && j < tags.length; j++) {
+                                    XmlTag tag = tags[j];
+                                    String name = tag.getAttribute("name").getValue();
+                                    if (floatDimen[0].containsKey(name)) {
+                                        String dimenFormattedString = MessageFormat.format(Constants.PLACEHOLDER_DIMEN, name
+                                                , getFormattedValue(floatDimen[0].get(name) * data.get(bucketIndex).getFactorDp())
+                                                , Constants.DP);
+                                        stringBuilder.append(dimenFormattedString);
+                                        setDp.remove(name);
+                                    } else if (floatDimen[1].containsKey(name)) {
+                                        String dimenFormattedString = MessageFormat.format(Constants.PLACEHOLDER_DIMEN, name
+                                                , getFormattedValue(floatDimen[1].get(name) * data.get(bucketIndex).getFactorSp())
+                                                , Constants.SP);
+                                        stringBuilder.append(dimenFormattedString);
+                                        setSp.remove(name);
+                                    } else {
+                                        String dimenFormattedString = MessageFormat.format(Constants.PLACEHOLDER_DIMEN, name
+                                                , tag.getValue().getText().toString()
+                                                , "");
+                                        stringBuilder.append(dimenFormattedString);
+                                    }
+                                }
+
+                                for (String name : setDp) {
+                                    String dimenFormattedString = MessageFormat.format(Constants.PLACEHOLDER_DIMEN, name
+                                            , getFormattedValue(floatDimen[0].get(name) * data.get(bucketIndex).getFactorDp())
+                                            , Constants.DP);
+                                    stringBuilder.append(dimenFormattedString);
+                                }
+                                for (String name : setSp) {
+                                    String dimenFormattedString = MessageFormat.format(Constants.PLACEHOLDER_DIMEN, name
+                                            , getFormattedValue(floatDimen[1].get(name) * data.get(bucketIndex).getFactorSp())
+                                            , Constants.SP);
+                                    stringBuilder.append(dimenFormattedString);
+                                }
+
+                                int suffixIndex = text.indexOf("</resources>");
+                                if (suffixIndex != -1) {
+                                    stringBuilder.append(text.substring(suffixIndex));
+                                }
+                                document.setText(stringBuilder.toString());
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+
+    }
+
+    protected String getFormattedValue(float v) {
+
+        DecimalFormatSymbols otherSymbols = new DecimalFormatSymbols(Locale.getDefault());
+        otherSymbols.setDecimalSeparator('.');
+        otherSymbols.setGroupingSeparator(',');
+        DecimalFormat formatter = new DecimalFormat("#.#", otherSymbols);
+        formatter.setGroupingUsed(false);
+        String s = formatter.format(v);
+        float floatedValue = Float.parseFloat(s);
+        int intValue = (int) floatedValue;
+        return intValue == floatedValue ? String.valueOf(intValue) : s;
+
     }
 }

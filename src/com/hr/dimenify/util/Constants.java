@@ -12,7 +12,7 @@ public interface Constants {
     String MDPI = "mdpi";
     float TITLE_SIZE = 16.0f;
     String NAME_TAG = "name";
-    String PLACEHOLDER_DIMEN = "<dimen name=\"{0}\">{1}{2}</dimen>\n";
+    String PLACEHOLDER_DIMEN = "\t<dimen name=\"{0}\">{1}{2}</dimen>\n";
     String FILE_NAME = "dimens.xml";
     String VALUES_PREFIX = "values-";
     String DP = "dp";
