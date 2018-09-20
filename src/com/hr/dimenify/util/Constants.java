@@ -33,7 +33,6 @@ public interface Constants {
     String METRIC = " metric";
     String DEFAULT_BUCKET = "sw600dp-land";
     float DEFAULT_SCALE_FACTOR = 1.2f;
-    int MAX_DIMENS = 10;
 
     enum Mode {
         SINGLE,

@@ -5,24 +5,38 @@ import com.hr.dimenify.util.Constants;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.LabeledComponent;
+import com.intellij.ui.components.JBScrollPane;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import java.awt.*;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import static com.hr.dimenify.util.Constants.*;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.GroupLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+
+import static com.hr.dimenify.util.Constants.ERROR_CODE;
+import static com.hr.dimenify.util.Constants.MESSAGES;
+import static com.hr.dimenify.util.Constants.TITLE_SIZE;
 
 public class BulkDimenDialog extends DialogWrapper {
     private JPanel controlPanel;
+    private JBScrollPane scrollPane;
     private List<Component> bucketLabels = new ArrayList<>();
     private List<JCheckBox> selectionValues = new ArrayList<>();
     private List<JTextField> bucketScaleFactors = new ArrayList<>();
@@ -31,7 +45,7 @@ public class BulkDimenDialog extends DialogWrapper {
     private ArrayList<Dimen> data = new ArrayList<>();
     GroupLayout layout;
 
-    LabeledComponent<JPanel> component;
+    LabeledComponent<JBScrollPane> component;
 
 
     public BulkDimenDialog(@Nullable Project project, ArrayList<Dimen> data) {
@@ -126,12 +140,7 @@ public class BulkDimenDialog extends DialogWrapper {
 
             JCheckBox selectedCheckBox = new JCheckBox();
             selectedCheckBox.setSelected(dimen.isSelected());
-            selectedCheckBox.addChangeListener(new ChangeListener() {
-                @Override
-                public void stateChanged(ChangeEvent e) {
-                    dimen.setSelected(selectedCheckBox.isSelected());
-                }
-            });
+            selectedCheckBox.addChangeListener(e -> dimen.setSelected(selectedCheckBox.isSelected()));
             if (!dimen.isMandatory()) {
                 JButton removeButton = new JButton("-");
                 removeButton.addActionListener(new AbstractAction() {
@@ -152,13 +161,16 @@ public class BulkDimenDialog extends DialogWrapper {
 
     private void initializePanel() {
         controlPanel = new JPanel();
+        scrollPane = new JBScrollPane(controlPanel, JBScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         addInitialFields();
         layout = new GroupLayout(controlPanel);
         controlPanel.setLayout(layout);
         layout.setAutoCreateGaps(true);
         layout.setAutoCreateContainerGaps(true);
         setLayoutConstraints();
-        component = LabeledComponent.create(controlPanel, "");
+        scrollPane.getVerticalScrollBar().addAdjustmentListener(e -> e.getAdjustable().setValue(e.getAdjustable().getMaximum()));
+        component = LabeledComponent.create(scrollPane, "");
     }
 
     private void setLayoutConstraints() {
@@ -387,10 +399,6 @@ public class BulkDimenDialog extends DialogWrapper {
 
     public int invalidBucketIndex() {
         HashMap<String, Boolean> containedBuckets = new HashMap<>();
-        //Check for size
-        if (data.size() >= Constants.MAX_DIMENS) {
-            return ERROR_CODE[1];
-        }
         //Check for duplicates
         for (Dimen dimen : data) {
             if (containedBuckets.containsKey(dimen.getBucket())) {

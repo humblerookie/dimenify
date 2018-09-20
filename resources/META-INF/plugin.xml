@@ -1,7 +1,7 @@
-<idea-plugin version="2">
+<idea-plugin>
     <id>com.hr.dimenify</id>
     <name>Dimenify</name>
-    <version>3.3</version>
+    <version>3.4</version>
     <vendor email="anvithv4@gmail.com" url="https://www.anvith.in">Anvith Bhat</vendor>
 
     <description><![CDATA[
@@ -13,6 +13,8 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    <b>v3.4</b><br/>
+        - Removed max bucket restriction,now add as many as you like.
     <b>v3.3</b><br/>
         - Fixed a long standing bug in single dimen conversion.
         - Prettier xml

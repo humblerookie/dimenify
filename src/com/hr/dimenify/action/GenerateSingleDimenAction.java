@@ -16,11 +16,10 @@ import com.intellij.psi.impl.source.xml.XmlTextImpl;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlTag;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static com.hr.dimenify.util.Constants.ERROR_CODE;
+import javax.swing.JOptionPane;
 
 
 public class GenerateSingleDimenAction extends AbstractDimenAction {
@@ -45,10 +44,6 @@ public class GenerateSingleDimenAction extends AbstractDimenAction {
             xmlFile = (XmlFile) psiFile;
             currentBucketIndex = getBucketIndex(psiFile);
             if (currentBucketIndex == -1) {
-                if (data.size() == 10) {
-                    showAlert(1);
-                    return;
-                }
                 String directoryName = psiFile.getParent().getName();
                 if (directoryName.startsWith(Constants.VALUES_PREFIX)) {
                     String bucket = directoryName.substring(Constants.VALUES_PREFIX.length());
@@ -143,8 +138,7 @@ public class GenerateSingleDimenAction extends AbstractDimenAction {
         SingleDimenDialog singleDimenDialog = new SingleDimenDialog(project, isDp, data);
         singleDimenDialog.show();
         int invalidIndex = singleDimenDialog.invalidBucketIndex();
-        if (singleDimenDialog.isOK() && (invalidIndex == -1 || (invalidIndex == ERROR_CODE[1] && data.size() == Constants.MAX_DIMENS))) {
-
+        if (singleDimenDialog.isOK() && invalidIndex == -1) {
             ArrayList<Dimen> data = singleDimenDialog.getConversionValues();
             saveValues(data);
             createDirectoriesAndFilesIfNeeded(psiFile.getParent().getParent());

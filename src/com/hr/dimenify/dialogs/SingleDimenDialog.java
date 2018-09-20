@@ -5,34 +5,47 @@ import com.hr.dimenify.util.Constants;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.LabeledComponent;
+import com.intellij.ui.components.JBScrollPane;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import java.awt.*;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.GroupLayout;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import static com.hr.dimenify.util.Constants.ERROR_CODE;
 import static com.hr.dimenify.util.Constants.MESSAGES;
 
 public class SingleDimenDialog extends DialogWrapper {
     private JPanel controlPanel;
+    private JBScrollPane scrollPane;
     private List<Component> bucketLabels = new ArrayList<>();
     private List<JCheckBox> selectionValues = new ArrayList<>();
     private List<JTextField> bucketScaleFactors = new ArrayList<>();
     private List<JButton> removeButtons = new ArrayList<>();
-    private ArrayList<Dimen> data = new ArrayList<>();
+    private ArrayList<Dimen> data;
     GroupLayout layout;
 
-    //float value = PropertiesComponent.getInstance().getFloat(SAVE_PREFIX + (isDp ? DP : SP) + dimen.getBucket(), );
-    LabeledComponent<JPanel> component;
+    LabeledComponent<JBScrollPane> component;
 
     boolean isDp;
 
@@ -115,15 +128,16 @@ public class SingleDimenDialog extends DialogWrapper {
 
     private void initializePanel(boolean isDp) {
         controlPanel = new JPanel();
-
-
+        scrollPane = new JBScrollPane(controlPanel, JBScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JBScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         addInitialFields(isDp);
         layout = new GroupLayout(controlPanel);
         controlPanel.setLayout(layout);
         layout.setAutoCreateGaps(true);
         layout.setAutoCreateContainerGaps(true);
         setLayoutConstraints();
-        component = LabeledComponent.create(controlPanel, "");
+        scrollPane.getVerticalScrollBar().addAdjustmentListener(e -> e.getAdjustable().setValue(e.getAdjustable().getMaximum()));
+        component = LabeledComponent.create(scrollPane, "");
     }
 
     private void setLayoutConstraints() {
@@ -289,9 +303,6 @@ public class SingleDimenDialog extends DialogWrapper {
 
     public int invalidBucketIndex() {
         HashMap<String, Boolean> containedBuckets = new HashMap<>();
-        if (data.size() >= Constants.MAX_DIMENS) {
-            return ERROR_CODE[1];
-        }
         for (Dimen dimen : data) {
             if (containedBuckets.containsKey(dimen.getBucket())) {
                 return ERROR_CODE[0];

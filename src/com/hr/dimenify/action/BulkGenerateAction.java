@@ -12,7 +12,8 @@ import com.intellij.psi.xml.XmlTag;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static com.hr.dimenify.util.Constants.*;
+import static com.hr.dimenify.util.Constants.MESSAGES;
+import static com.hr.dimenify.util.Constants.VALUES_PREFIX;
 
 public class BulkGenerateAction extends AbstractDimenAction {
 
@@ -50,7 +51,7 @@ public class BulkGenerateAction extends AbstractDimenAction {
         }
         bulkDimenDialog.show();
         int invalidIndex = bulkDimenDialog.invalidBucketIndex();
-        if (bulkDimenDialog.isOK() && (invalidIndex == -1 || (invalidIndex == ERROR_CODE[1] && data.size() == Constants.MAX_DIMENS))) {
+        if (bulkDimenDialog.isOK() && invalidIndex == -1) {
             saveValues(data);
             int index = indexOfBucket(data, bucket);
             if (index != -1) {
