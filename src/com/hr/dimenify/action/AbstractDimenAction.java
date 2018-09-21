@@ -17,14 +17,22 @@ import com.intellij.psi.PsiFile;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlTag;
 
-import javax.swing.*;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.hr.dimenify.util.Constants.*;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+
+import static com.hr.dimenify.util.Constants.MESSAGES;
+import static com.hr.dimenify.util.Constants.MIGRATION_FLAG;
+import static com.hr.dimenify.util.Constants.SAVE_PREFIX_V2;
 
 public abstract class AbstractDimenAction extends AnAction {
 
@@ -100,30 +108,42 @@ public abstract class AbstractDimenAction extends AnAction {
 
     protected void createDirectoriesAndFilesIfNeeded(PsiDirectory psiParent) {
         for (Dimen datum : data) {
-            WriteCommandAction.runWriteCommandAction(project, () -> {
-                PsiDirectory subDirectory = psiParent.findSubdirectory(datum.getDirectory());
-                if (subDirectory == null) {
-                    subDirectory = psiParent.createSubdirectory(datum.getDirectory());
-                }
-                PsiFile file = subDirectory.findFile(Constants.FILE_NAME);
-                if (file == null) {
-                    PsiFile psiFile = subDirectory.createFile(Constants.FILE_NAME);
-                    Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
-                    document.setText(Constants.RESOURCES_TEXT);
-                    fileCreationCompleteAndCheck();
+            if (datum.isSelected()) {
+                WriteCommandAction.runWriteCommandAction(project, () -> {
+                    PsiDirectory subDirectory = psiParent.findSubdirectory(datum.getDirectory());
+                    if (subDirectory == null) {
+                        subDirectory = psiParent.createSubdirectory(datum.getDirectory());
+                    }
+                    PsiFile file = subDirectory.findFile(Constants.FILE_NAME);
+                    if (file == null) {
+                        PsiFile psiFile = subDirectory.createFile(Constants.FILE_NAME);
+                        Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
+                        document.setText(Constants.RESOURCES_TEXT);
+                        fileCreationCompleteAndCheck();
 
-                } else {
-                    fileCreationCompleteAndCheck();
-                }
-            });
+                    } else {
+                        fileCreationCompleteAndCheck();
+                    }
+                });
+            }
         }
     }
 
     protected void fileCreationCompleteAndCheck() {
         int value = fileCreationCount.incrementAndGet();
-        if (value == data.size()) {
+        if (value == getSelectedCount(data)) {
             calculateAndWriteScaledValueToFiles();
         }
+    }
+
+    private int getSelectedCount(ArrayList<Dimen> data) {
+        int selected = 0;
+        for (Dimen d : data) {
+            if (d.isSelected()) {
+                selected++;
+            }
+        }
+        return selected;
     }
 
     @Override

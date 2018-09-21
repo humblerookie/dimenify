@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.hr.dimenify</id>
     <name>Dimenify</name>
-    <version>3.4</version>
+    <version>3.5</version>
     <vendor email="anvithv4@gmail.com" url="https://www.anvith.in">Anvith Bhat</vendor>
 
     <description><![CDATA[
@@ -13,6 +13,8 @@
     ]]></description>
 
     <change-notes><![CDATA[
+     <b>v3.5</b><br/>
+        - Patched a folder creation bug
     <b>v3.4</b><br/>
         - Removed max bucket restriction,now add as many as you like.
     <b>v3.3</b><br/>
@@ -51,7 +53,7 @@
     </change-notes>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="145.0"/>
+    <idea-version since-build="145.0" />
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -66,18 +68,16 @@
     <actions>
         <!-- Add your actions here -->
         <action id="generateDimens" class="com.hr.dimenify.action.GenerateSingleDimenAction"
-                text="Generate alternate dimens.."
-                icon="/icons/dimenify.png"
-                description="This generates dimensions for other density buckets">
-            <add-to-group group-id="GenerateGroup" anchor="last"/>
+            text="Generate alternate dimens.." icon="/icons/dimenify.png"
+            description="This generates dimensions for other density buckets">
+            <add-to-group group-id="GenerateGroup" anchor="last" />
         </action>
 
         <action id="rightClickDimenFile" class="com.hr.dimenify.action.BulkGenerateAction"
-                text="Generate alternate dimens from file"
-                icon="/icons/dimenify.png"
-                description="This generates dimensions for other density buckets">
+            text="Generate alternate dimens from file" icon="/icons/dimenify.png"
+            description="This generates dimensions for other density buckets">
             <add-to-group group-id="ProjectViewPopupMenu" anchor="before"
-                          relative-to-action="ProjectViewPopupMenuRefactoringGroup"/>
+                relative-to-action="ProjectViewPopupMenuRefactoringGroup" />
         </action>
     </actions>
 
