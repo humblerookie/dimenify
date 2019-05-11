@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>com.hr.dimenify</id>
     <name>Dimenify</name>
-    <version>3.6</version>
+    <version>3.7</version>
     <vendor email="anvithv4@gmail.com" url="https://www.anvith.in">Anvith Bhat</vendor>
 
     <description><![CDATA[
@@ -13,44 +13,11 @@
     ]]></description>
 
     <change-notes><![CDATA[
-    <b>v3.6</b><br/>
-        - Compatible with latest android studio and fixed a crash where the source density is deleted while generating for single dimension
-     <b>v3.5</b><br/>
-        - Patched a folder creation bug
-    <b>v3.4</b><br/>
-        - Removed max bucket restriction,now add as many as you like.
-    <b>v3.3</b><br/>
-        - Fixed a long standing bug in single dimen conversion.
-        - Prettier xml
-     <b>v3.2</b><br/>
-        - Fixed a message formatter bug causing floated strings to be prettified with comma.
+    <b>v3.7</b><br/>
+        - Compatible with latest android studio
+        <br/>
+        - Fixed a crash where the source density is deleted while generating for single dimension
 
-    <b>v3.1</b><br/>
-        - Added bulk file conversion support. Now one can right click on a dimen file
-          and generate transformed dimensions for all values in the file.
-        - Patched a few bugs.
-
-    <b>v3.0</b><br/>
-        - Added ability to provide custom buckets upto a max of 5.
-        - User can now choose to exclude any buckets from current dimension generation.
-        - Auto detect new buckets and prompt user for scale value.
-
-    <b>v2.2</b><br/>
-        - Added ability to provide custom buckets upto a max of 5.
-        - User can now choose to exclude any buckets from current dimension generation.
-        - Auto detect new buckets and prompt user for scale value.
-
-    <b>v2.1</b><br/>
-        - Bugfix for some locales where comma is used as decimal separator.
-
-    <b>v2.0</b><br/>
-        - Added custom scaling factors for sp and dp
-    <pre>
-       TODO
-      - Parse elements as psi elements and update file accordingly.
-     </pre><br/>
-    <b>v1.0</b><br/>
-       Contains hard bound scaling factors.
     ]]>
     </change-notes>
 
